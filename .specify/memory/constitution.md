@@ -1,75 +1,50 @@
-<!--
-Sync Impact Report:
-Version change: [NEW] → 1.0.0
-Modified principles: [NEW CONSTITUTION]
-Added sections: All sections (new constitution)
-Removed sections: None (new constitution)
-Templates requiring updates:
-- ✅ .specify/templates/plan-template.md (constitution check section)
-- ✅ .specify/templates/spec-template.md (requirements alignment)
-- ✅ .specify/templates/tasks-template.md (task categorization)
-- ✅ .specify/templates/agent-file-template.md (code style alignment)
-Follow-up TODOs: None
--->
-
-# Overcast Constitution
+# [PROJECT_NAME] Constitution
+<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
 ## Core Principles
 
-### I. Simplicity First
-Code MUST prioritize readability and maintainability over cleverness. Every solution starts with the simplest approach that works. Complex patterns are only introduced when simple solutions prove insufficient, and the complexity MUST be justified in comments or documentation.
+### [PRINCIPLE_1_NAME]
+<!-- Example: I. Library-First -->
+[PRINCIPLE_1_DESCRIPTION]
+<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-**Rationale**: Newcomers to full-stack development need clear, understandable code to learn from. Complex abstractions create barriers to understanding and maintenance.
+### [PRINCIPLE_2_NAME]
+<!-- Example: II. CLI Interface -->
+[PRINCIPLE_2_DESCRIPTION]
+<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
 
-### II. Single File Preference
-Features MUST be implemented in as few files as possible without sacrificing clarity. Related functionality stays together unless separation provides clear organizational benefits. Avoid creating excessive file hierarchies or splitting simple logic across multiple modules.
+### [PRINCIPLE_3_NAME]
+<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
+[PRINCIPLE_3_DESCRIPTION]
+<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-**Rationale**: Reduces cognitive overhead for developers navigating the codebase. Easier to understand complete functionality when it's contained in fewer locations.
+### [PRINCIPLE_4_NAME]
+<!-- Example: IV. Integration Testing -->
+[PRINCIPLE_4_DESCRIPTION]
+<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
 
-### III. Comment-Driven Development
-All non-trivial code MUST include explanatory comments. Comments explain WHY decisions were made, not just WHAT the code does. Complex business logic, algorithm choices, and architectural decisions require detailed explanations accessible to junior developers.
+### [PRINCIPLE_5_NAME]
+<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
+[PRINCIPLE_5_DESCRIPTION]
+<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
 
-**Rationale**: Comments serve as teaching tools for newcomers and prevent knowledge loss when team members change.
+## [SECTION_2_NAME]
+<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
 
-### IV. Newcomer-Friendly Architecture
-Code structure and naming MUST be immediately understandable to developers with basic full-stack knowledge. Avoid domain-specific jargon, overly abstract patterns, or implicit conventions. When advanced patterns are necessary, include educational comments explaining the concept.
+[SECTION_2_CONTENT]
+<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
-**Rationale**: Ensures the codebase remains accessible as a learning resource and reduces onboarding time for new team members.
+## [SECTION_3_NAME]
+<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 
-### V. Test-Driven Clarity
-Tests MUST serve as living documentation and examples. Test names clearly describe scenarios in plain language. Test code follows the same simplicity and commenting principles as production code. Integration tests demonstrate complete user workflows.
-
-**Rationale**: Tests become the primary documentation for how features work, especially valuable for newcomers understanding system behavior.
-
-## Development Standards
-
-### Code Organization
-- Components and utilities stay in single files until they exceed 300 lines
-- Related functions group together with clear section comments
-- File names use descriptive, full words (no abbreviations)
-- Directory structure mirrors user-facing feature organization
-
-### Documentation Requirements
-- Every public function includes JSDoc with examples
-- Complex algorithms include step-by-step comment explanations
-- README files explain setup and common workflows in beginner-friendly language
-- Architecture decisions documented with rationale and alternatives considered
-
-### Technology Constraints
-- Prefer standard library solutions over external dependencies
-- When dependencies are added, document why they're necessary and how they work
-- Avoid bleeding-edge features that lack widespread documentation
-- Choose tools with strong community support and learning resources
+[SECTION_3_CONTENT]
+<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
 
 ## Governance
+<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-### Amendment Process
-Constitution changes require documentation of the problem being solved and why existing principles are insufficient. All amendments must maintain focus on newcomer accessibility and code simplicity.
+[GOVERNANCE_RULES]
+<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
 
-### Compliance Review
-Every pull request MUST verify adherence to simplicity and commenting principles. Code reviews prioritize educational value and maintainability over performance optimizations unless performance requirements are clearly documented.
-
-### Violation Handling
-Complexity that violates these principles requires explicit justification in code comments and documentation. The justification must explain why simpler alternatives were insufficient and include learning resources for the concepts used.
-
-**Version**: 1.0.0 | **Ratified**: 2025-10-02 | **Last Amended**: 2025-10-02
+**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
+<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

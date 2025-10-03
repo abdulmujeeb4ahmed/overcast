@@ -1,0 +1,484 @@
+openapi: 3.0.3
+info:
+  title: Queue Management API
+  description: API for managing raise hand queue in live classrooms
+  version: 1.0.0
+  contact:
+    name: Overcast Development Team
+    email: dev@overcast.com
+
+servers:
+  - url: /api/queue
+    description: Queue management endpoints
+
+paths:
+  /{classroomId}/raise-hand:
+    post:
+      summary: Raise hand to join speaking queue
+      description: Participant raises their hand to request permission to speak
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - participantId
+                - participantName
+              properties:
+                participantId:
+                  type: string
+                  format: uuid
+                  description: Daily.co participant session ID
+                participantName:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Display name of participant
+      responses:
+        '200':
+          description: Hand raised successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  queueEntry:
+                    $ref: '#/components/schemas/QueueEntry'
+                  position:
+                    type: integer
+                    description: Position in queue (1-based)
+                    example: 2
+        '400':
+          description: Bad request - invalid input or already in queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - participant not in classroom
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - queue at capacity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{classroomId}/lower-hand:
+    post:
+      summary: Lower hand and remove from queue
+      description: Participant lowers their hand and is removed from queue
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - participantId
+              properties:
+                participantId:
+                  type: string
+                  format: uuid
+                  description: Daily.co participant session ID
+      responses:
+        '200':
+          description: Hand lowered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Hand lowered successfully"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found - participant not in queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{classroomId}/call-on:
+    post:
+      summary: Call on next participant in queue
+      description: Instructor calls on the next person in the queue to speak
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - instructorId
+              properties:
+                instructorId:
+                  type: string
+                  format: uuid
+                  description: Instructor session ID
+      responses:
+        '200':
+          description: Participant called on successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  activeSpeaker:
+                    $ref: '#/components/schemas/ActiveSpeaker'
+                  queueEntry:
+                    $ref: '#/components/schemas/QueueEntry'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not an instructor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found - no participants in queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{classroomId}/lower-individual:
+    post:
+      summary: Lower individual participant's hand
+      description: Instructor lowers a specific participant's hand
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - instructorId
+                - participantId
+              properties:
+                instructorId:
+                  type: string
+                  format: uuid
+                  description: Instructor session ID
+                participantId:
+                  type: string
+                  format: uuid
+                  description: Participant to lower hand for
+      responses:
+        '200':
+          description: Hand lowered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Participant hand lowered"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not an instructor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found - participant not in queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{classroomId}/lower-all:
+    post:
+      summary: Lower all hands and clear queue
+      description: Instructor lowers all hands and clears the entire queue
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - instructorId
+              properties:
+                instructorId:
+                  type: string
+                  format: uuid
+                  description: Instructor session ID
+      responses:
+        '200':
+          description: All hands lowered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  loweredCount:
+                    type: integer
+                    description: Number of hands lowered
+                    example: 5
+                  message:
+                    type: string
+                    example: "All hands lowered"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not an instructor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{classroomId}/status:
+    get:
+      summary: Get current queue status
+      description: Get the current state of the queue for a classroom
+      tags:
+        - Queue Management
+      parameters:
+        - name: classroomId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[1-6]$'
+          description: Classroom identifier (1-6)
+      responses:
+        '200':
+          description: Queue status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueStatus'
+        '400':
+          description: Bad request - invalid classroom ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found - classroom not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    QueueEntry:
+      type: object
+      required:
+        - id
+        - participantId
+        - participantName
+        - classroomId
+        - raisedAt
+        - position
+        - isActive
+        - role
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the queue entry
+        participantId:
+          type: string
+          format: uuid
+          description: Daily.co participant session ID
+        participantName:
+          type: string
+          description: Display name of participant
+        classroomId:
+          type: string
+          pattern: '^[1-6]$'
+          description: Classroom identifier
+        raisedAt:
+          type: string
+          format: date-time
+          description: Timestamp when hand was raised
+        position:
+          type: integer
+          minimum: 1
+          description: Position in queue (1-based)
+        isActive:
+          type: boolean
+          description: Whether this participant is currently speaking
+        role:
+          type: string
+          enum: [student, instructor]
+          description: Participant role
+
+    ActiveSpeaker:
+      type: object
+      required:
+        - participantId
+        - participantName
+        - classroomId
+        - calledAt
+        - role
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: Daily.co participant session ID
+        participantName:
+          type: string
+          description: Display name of participant
+        classroomId:
+          type: string
+          pattern: '^[1-6]$'
+          description: Classroom identifier
+        calledAt:
+          type: string
+          format: date-time
+          description: When instructor called on this participant
+        role:
+          type: string
+          enum: [student, instructor]
+          description: Participant role
+
+    QueueStatus:
+      type: object
+      required:
+        - classroomId
+        - entries
+        - activeSpeaker
+        - maxCapacity
+        - lastUpdated
+        - isActive
+      properties:
+        classroomId:
+          type: string
+          pattern: '^[1-6]$'
+          description: Classroom identifier
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueEntry'
+          description: Ordered list of queue entries
+        activeSpeaker:
+          oneOf:
+            - $ref: '#/components/schemas/ActiveSpeaker'
+            - type: "null"
+          description: Currently active speaker (null if none)
+        maxCapacity:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Maximum queue capacity
+        lastUpdated:
+          type: string
+          format: date-time
+          description: Timestamp of last state change
+        isActive:
+          type: boolean
+          description: Whether queue is accepting new entries
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Participant already in queue"
+        code:
+          type: string
+          description: Optional error code
+          example: "ALREADY_IN_QUEUE"

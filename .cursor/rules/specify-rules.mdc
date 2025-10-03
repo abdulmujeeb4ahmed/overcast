@@ -31,9 +31,9 @@ npm test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNO
 [EXTRACTED FROM ACTIVE TECHNOLOGIES - TYPESCRIPT/JAVASCRIPT FOR NEXT.JS]
 
 ## Recent Changes
+- 003-build-a-raise: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 002-we-are-looking: Added TypeScript/JavaScript with Next.js 15.5.4, React 19.1.0 + Daily Video API (@daily-co/daily-react, @daily-co/daily-js, jotai), Next.js, Tailwind CSS v4, Vercel serverless functions
 - 002-we-are-looking: Added TypeScript/JavaScript with Next.js 15.5.4, React 19.1.0 + Daily Video API (@daily-co/daily-js, @daily-co/daily-react), Next.js, Tailwind CSS v4, Vercel serverless functions
-- 001-we-are-looking: Added TypeScript 5.x with Next.js 15.5.4 + @daily-co/daily-react, @daily-co/daily-js, jotai, tailwindcss
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

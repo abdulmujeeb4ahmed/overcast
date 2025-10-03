@@ -1,8 +1,8 @@
 
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Raise Hand + Queue System
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `003-build-a-raise` | **Date**: 2025-10-03 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/003-build-a-raise/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
@@ -31,23 +31,34 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-[Extract from feature spec: primary requirement + technical approach from research]
+Build a real-time, session-scoped Raise Hand + Queue system for live classrooms that allows participants to request speaking permission and instructors to manage the speaking order in a fair, transparent manner.
 
 ## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.0, React 18, Next.js 14  
+**Primary Dependencies**: Daily.co React hooks, React state management  
+**Storage**: Session-scoped in-memory state (no persistent storage)  
+**Testing**: Jest, Playwright, React Testing Library  
+**Target Platform**: Web browser (Chrome, Firefox, Safari, Edge)  
+**Project Type**: Web application (Next.js + React)  
+**Performance Goals**: Sub-200ms real-time updates, 50 concurrent participants  
+**Constraints**: Real-time synchronization, accessibility compliance, graceful degradation  
+**Scale/Scope**: 50 participants per classroom, 6 classrooms, session-scoped data
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**Initial Constitution Check**: PASS
+- Extends existing Daily.co integration (no new infrastructure)
+- Leverages existing participant management system
+- Session-scoped data (no persistent storage complexity)
+- Real-time updates via existing WebSocket infrastructure
+- Accessibility compliance through semantic HTML and ARIA
+
+**Post-Design Constitution Check**: PASS
+- API contracts follow existing patterns
+- Data model integrates with current participant system
+- No additional storage requirements
+- Maintains existing architecture principles
 
 ## Project Structure
 
@@ -63,50 +74,48 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 ```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
+app/
+├── api/
+│   └── queue/
+│       └── [classroomId]/
+│           ├── raise-hand/
+│           │   └── route.ts
+│           ├── lower-hand/
+│           │   └── route.ts
+│           ├── call-on/
+│           │   └── route.ts
+│           ├── lower-individual/
+│           │   └── route.ts
+│           ├── lower-all/
+│           │   └── route.ts
+│           └── status/
+│               └── route.ts
+├── components/
+│   ├── QueuePanel.tsx
+│   ├── RaiseHandButton.tsx
+│   └── QueueStatus.tsx
 └── lib/
+    ├── queue-types.ts
+    ├── queue-utils.ts
+    └── queue-state.ts
 
 tests/
 ├── contract/
+│   └── test_queue_api.test.ts
 ├── integration/
+│   └── test_queue_flow.test.ts
 └── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+    ├── components/
+    │   ├── QueuePanel.test.tsx
+    │   ├── RaiseHandButton.test.tsx
+    │   └── QueueStatus.test.tsx
+    └── lib/
+        ├── queue-utils.test.ts
+        └── queue-state.test.ts
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Web application structure extending existing Next.js app with new queue API endpoints and React components for queue management
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -202,18 +211,18 @@ directories captured above]
 *This checklist is updated during execution flow*
 
 **Phase Status**:
-- [ ] Phase 0: Research complete (/plan command)
-- [ ] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
+- [x] Phase 0: Research complete (/plan command)
+- [x] Phase 1: Design complete (/plan command)
+- [x] Phase 2: Task planning complete (/plan command - describe approach only)
 - [ ] Phase 3: Tasks generated (/tasks command)
 - [ ] Phase 4: Implementation complete
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-- [ ] Initial Constitution Check: PASS
-- [ ] Post-Design Constitution Check: PASS
-- [ ] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
+- [x] Initial Constitution Check: PASS
+- [x] Post-Design Constitution Check: PASS
+- [x] All NEEDS CLARIFICATION resolved
+- [x] Complexity deviations documented
 
 ---
 *Based on Constitution v2.1.1 - See `/memory/constitution.md`*
