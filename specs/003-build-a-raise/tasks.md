@@ -41,62 +41,62 @@
 - Paths based on Next.js structure from plan.md
 
 ## Phase 3.1: Setup
-- [ ] T001 Create queue API directory structure in app/api/queue/[classroomId]/
-- [ ] T002 Create queue component directory structure in app/components/
-- [ ] T003 Create queue library files in lib/ (queue-types.ts, queue-utils.ts, queue-state.ts)
-- [ ] T004 [P] Configure TypeScript types for queue system
-- [ ] T005 [P] Configure queue state management with Daily.co integration
+- [x] T001 Create queue API directory structure in app/api/queue/[classroomId]/
+- [x] T002 Create queue component directory structure in app/components/
+- [x] T003 Create queue library files in lib/ (queue-types.ts, queue-utils.ts, queue-state.ts)
+- [x] T004 [P] Configure TypeScript types for queue system
+- [x] T005 [P] Configure queue state management with Daily.co integration
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
-- [ ] T006 [P] Contract test POST /api/queue/{classroomId}/raise-hand in tests/contract/test_queue_raise_hand.test.ts
-- [ ] T007 [P] Contract test POST /api/queue/{classroomId}/lower-hand in tests/contract/test_queue_lower_hand.test.ts
-- [ ] T008 [P] Contract test POST /api/queue/{classroomId}/call-on in tests/contract/test_queue_call_on.test.ts
-- [ ] T009 [P] Contract test POST /api/queue/{classroomId}/lower-individual in tests/contract/test_queue_lower_individual.test.ts
-- [ ] T010 [P] Contract test POST /api/queue/{classroomId}/lower-all in tests/contract/test_queue_lower_all.test.ts
-- [ ] T011 [P] Contract test GET /api/queue/{classroomId}/status in tests/contract/test_queue_status.test.ts
-- [ ] T012 [P] Integration test participant raises hand flow in tests/integration/test_queue_raise_hand.test.ts
-- [ ] T013 [P] Integration test instructor calls on participant flow in tests/integration/test_queue_call_on.test.ts
-- [ ] T014 [P] Integration test participant leaves during queue flow in tests/integration/test_queue_participant_leaves.test.ts
-- [ ] T015 [P] Integration test queue at capacity flow in tests/integration/test_queue_capacity.test.ts
+- [x] T006 [P] Contract test POST /api/queue/{classroomId}/raise-hand in tests/contract/test_queue_raise_hand.test.ts
+- [x] T007 [P] Contract test POST /api/queue/{classroomId}/lower-hand in tests/contract/test_queue_lower_hand.test.ts
+- [x] T008 [P] Contract test POST /api/queue/{classroomId}/call-on in tests/contract/test_queue_call_on.test.ts
+- [x] T009 [P] Contract test POST /api/queue/{classroomId}/lower-individual in tests/contract/test_queue_lower_individual.test.ts
+- [x] T010 [P] Contract test POST /api/queue/{classroomId}/lower-all in tests/contract/test_queue_lower_all.test.ts
+- [x] T011 [P] Contract test GET /api/queue/{classroomId}/status in tests/contract/test_queue_status.test.ts
+- [x] T012 [P] Integration test participant raises hand flow in tests/integration/test_queue_raise_hand.test.ts
+- [x] T013 [P] Integration test instructor calls on participant flow in tests/integration/test_queue_call_on.test.ts
+- [x] T014 [P] Integration test participant leaves during queue flow in tests/integration/test_queue_participant_leaves.test.ts
+- [x] T015 [P] Integration test queue at capacity flow in tests/integration/test_queue_capacity.test.ts
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
-- [ ] T016 [P] QueueEntry type definition in lib/queue-types.ts
-- [ ] T017 [P] QueueState type definition in lib/queue-types.ts
-- [ ] T018 [P] ActiveSpeaker type definition in lib/queue-types.ts
-- [ ] T019 [P] Queue utility functions in lib/queue-utils.ts
-- [ ] T020 [P] Queue state management in lib/queue-state.ts
-- [ ] T021 [P] RaiseHandButton component in app/components/RaiseHandButton.tsx
-- [ ] T022 [P] QueuePanel component in app/components/QueuePanel.tsx
-- [ ] T023 [P] QueueStatus component in app/components/QueueStatus.tsx
-- [ ] T024 POST /api/queue/{classroomId}/raise-hand endpoint
-- [ ] T025 POST /api/queue/{classroomId}/lower-hand endpoint
-- [ ] T026 POST /api/queue/{classroomId}/call-on endpoint
-- [ ] T027 POST /api/queue/{classroomId}/lower-individual endpoint
-- [ ] T028 POST /api/queue/{classroomId}/lower-all endpoint
-- [ ] T029 GET /api/queue/{classroomId}/status endpoint
+- [x] T016 [P] QueueEntry type definition in lib/queue-types.ts
+- [x] T017 [P] QueueState type definition in lib/queue-types.ts
+- [x] T018 [P] ActiveSpeaker type definition in lib/queue-types.ts
+- [x] T019 [P] Queue utility functions in lib/queue-utils.ts
+- [x] T020 [P] Queue state management in lib/queue-state.ts
+- [x] T021 [P] RaiseHandButton component in app/components/RaiseHandButton.tsx
+- [x] T022 [P] QueuePanel component in app/components/QueuePanel.tsx
+- [x] T023 [P] QueueStatus component in app/components/QueueStatus.tsx
+- [x] T024 POST /api/queue/{classroomId}/raise-hand endpoint
+- [x] T025 POST /api/queue/{classroomId}/lower-hand endpoint
+- [x] T026 POST /api/queue/{classroomId}/call-on endpoint
+- [x] T027 POST /api/queue/{classroomId}/lower-individual endpoint
+- [x] T028 POST /api/queue/{classroomId}/lower-all endpoint
+- [x] T029 GET /api/queue/{classroomId}/status endpoint
 
 ## Phase 3.4: Integration
-- [ ] T030 Integrate RaiseHandButton into Classroom component
-- [ ] T031 Integrate QueuePanel into InstructorControls component
-- [ ] T032 Integrate QueueStatus into ParticipantList component
-- [ ] T033 Connect queue state to Daily.co participant events
-- [ ] T034 Implement real-time queue updates via Daily.co WebSocket
-- [ ] T035 Add queue state persistence across page refreshes
-- [ ] T036 Implement automatic cleanup on participant departure
-- [ ] T037 Add queue capacity enforcement and error handling
+- [x] T030 Integrate RaiseHandButton into Classroom component
+- [x] T031 Integrate QueuePanel into InstructorControls component
+- [x] T032 Integrate QueueStatus into ParticipantList component
+- [x] T033 Connect queue state to Daily.co participant events
+- [x] T034 Implement real-time queue updates via Daily.co WebSocket
+- [x] T035 Add queue state persistence across page refreshes
+- [x] T036 Implement automatic cleanup on participant departure
+- [x] T037 Add queue capacity enforcement and error handling
 
 ## Phase 3.5: Polish
-- [ ] T038 [P] Unit tests for QueueEntry validation in tests/unit/lib/queue-utils.test.ts
-- [ ] T039 [P] Unit tests for QueueState management in tests/unit/lib/queue-state.test.ts
-- [ ] T040 [P] Unit tests for RaiseHandButton component in tests/unit/components/RaiseHandButton.test.tsx
-- [ ] T041 [P] Unit tests for QueuePanel component in tests/unit/components/QueuePanel.test.tsx
-- [ ] T042 [P] Unit tests for QueueStatus component in tests/unit/components/QueueStatus.test.tsx
-- [ ] T043 Performance tests for real-time updates (<200ms)
-- [ ] T044 Accessibility tests for keyboard navigation and screen readers
-- [ ] T045 [P] Update API documentation in contracts/queue-api.yaml
-- [ ] T046 Remove code duplication and optimize performance
-- [ ] T047 Run manual testing scenarios from quickstart.md
+- [x] T038 [P] Unit tests for QueueEntry validation in tests/unit/lib/queue-utils.test.ts
+- [x] T039 [P] Unit tests for QueueState management in tests/unit/lib/queue-state.test.ts
+- [x] T040 [P] Unit tests for RaiseHandButton component in tests/unit/components/RaiseHandButton.test.tsx
+- [x] T041 [P] Unit tests for QueuePanel component in tests/unit/components/QueuePanel.test.tsx
+- [x] T042 [P] Unit tests for QueueStatus component in tests/unit/components/QueueStatus.test.tsx
+- [x] T043 Performance tests for real-time updates (<200ms)
+- [x] T044 Accessibility tests for keyboard navigation and screen readers
+- [x] T045 [P] Update API documentation in contracts/queue-api.yaml
+- [x] T046 Remove code duplication and optimize performance
+- [x] T047 Run manual testing scenarios from quickstart.md
 
 ## Dependencies
 - Tests (T006-T015) before implementation (T016-T029)

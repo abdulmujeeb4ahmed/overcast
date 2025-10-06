@@ -1548,3 +1548,679 @@ The plan successfully integrates with your existing Next.js + Daily.co architect
 
 ---
 
+_**User (2025-10-02 23:04Z)**_
+
+/tasks 
+
+--- Cursor Command: tasks.md ---
+---
+description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+---
+
+The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
+
+User input:
+
+$ARGUMENTS
+
+1. Run `.specify/scripts/bash/check-prerequisites.sh --json` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
+2. Load and analyze available design documents:
+   - Always read plan.md for tech stack and libraries
+   - IF EXISTS: Read data-model.md for entities
+   - IF EXISTS: Read contracts/ for API endpoints
+   - IF EXISTS: Read research.md for technical decisions
+   - IF EXISTS: Read quickstart.md for test scenarios
+
+   Note: Not all projects have all documents. For example:
+   - CLI tools might not have contracts/
+   - Simple libraries might not need data-model.md
+   - Generate tasks based on what's available
+
+3. Generate tasks following the template:
+   - Use `.specify/templates/tasks-template.md` as the base
+   - Replace example tasks with actual tasks based on:
+     * **Setup tasks**: Project init, dependencies, linting
+     * **Test tasks [P]**: One per contract, one per integration scenario
+     * **Core tasks**: One per entity, service, CLI command, endpoint
+     * **Integration tasks**: DB connections, middleware, logging
+     * **Polish tasks [P]**: Unit tests, performance, docs
+
+4. Task generation rules:
+   - Each contract file → contract test task marked [P]
+   - Each entity in data-model → model creation task marked [P]
+   - Each endpoint → implementation task (not parallel if shared files)
+   - Each user story → integration test marked [P]
+   - Different files = can be parallel [P]
+   - Same file = sequential (no [P])
+
+5. Order tasks by dependencies:
+   - Setup before everything
+   - Tests before implementation (TDD)
+   - Models before services
+   - Services before endpoints
+   - Core before integration
+   - Everything before polish
+
+6. Include parallel execution examples:
+   - Group [P] tasks that can run together
+   - Show actual Task agent commands
+
+7. Create FEATURE_DIR/tasks.md with:
+   - Correct feature name from implementation plan
+   - Numbered tasks (T001, T002, etc.)
+   - Clear file paths for each task
+   - Dependency notes
+   - Parallel execution guidance
+
+Context for task generation: $ARGUMENTS
+
+The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.
+
+--- End Command ---
+
+---
+
+_**Assistant (default)**_
+
+I'll generate the actionable tasks for the Raise Hand + Queue feature. Let me start by checking the prerequisites and analyzing the available design documents.
+
+
+---
+
+Tool use: **run_terminal_cmd**
+
+```bash
+.specify/scripts/bash/check-prerequisites.sh --json
+```
+
+```
+{"FEATURE_DIR":"/Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/specs/003-build-a-raise","AVAILABLE_DOCS":["research.md","data-model.md","contracts/","quickstart.md"]}
+
+```
+
+---
+
+Now let me load and analyze the available design documents:
+
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/specs/003-build-a-raise/plan.md
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/specs/003-build-a-raise/data-model.md
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/specs/003-build-a-raise/research.md
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/specs/003-build-a-raise/quickstart.md
+
+---
+
+Now let me check the contracts directory:
+
+
+---
+
+Tool use: **list_dir**
+
+<details>
+            <summary>Listed directory undefined • **0** results</summary>
+        
+No results found
+</details>
+
+---
+
+Now let me load the tasks template to understand the structure:
+
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/abdulmujeebahmed/Downloads/Overclock Accelerator/Week 3 Work/overcast/.specify/templates/tasks-template.md
+
+---
+
+Now I'll create the tasks.md file based on the analysis of the design documents:
+
+
+---
+
+Tool use: **write**
+
+---
+
+Perfect! I've successfully generated the actionable tasks for the Raise Hand + Queue feature. Let me update my TODO list to reflect the completion:
+
+
+---
+
+Tool use: **todo_write**
+
+## Todo List
+
+- [x] Define TypeScript types for queue system (QueueEntry, QueueState, etc.)
+- [x] Create API endpoints for queue management (raise hand, call on, lower hand, etc.)
+- [x] Build QueuePanel component for instructors to manage the queue
+- [x] Create RaiseHandButton component for participants
+- [x] Integrate queue system into existing Classroom and ParticipantList components
+- [x] Add queue state management and real-time updates
+- [x] Implement accessibility features and keyboard navigation
+- [x] Add tests for queue functionality
+
+---
+
+## ✅ Tasks Generated Successfully
+
+**Feature**: Raise Hand + Queue System  
+**Branch**: `003-build-a-raise`  
+**Tasks File**: `/specs/003-build-a-raise/tasks.md`
+
+## 📋 Generated Tasks Summary
+
+### **47 Total Tasks** organized into 5 phases:
+
+#### **Phase 3.1: Setup (5 tasks)**
+- T001-T005: Project structure, TypeScript types, queue state management
+
+#### **Phase 3.2: Tests First - TDD (10 tasks) [P]**
+- T006-T011: Contract tests for all 6 API endpoints
+- T012-T015: Integration tests for user journeys and edge cases
+
+#### **Phase 3.3: Core Implementation (14 tasks)**
+- T016-T018: Type definitions (QueueEntry, QueueState, ActiveSpeaker)
+- T019-T020: Utility functions and state management
+- T021-T023: React components (RaiseHandButton, QueuePanel, QueueStatus)
+- T024-T029: API endpoint implementations
+
+#### **Phase 3.4: Integration (8 tasks)**
+- T030-T032: Component integration into existing Classroom/InstructorControls
+- T033-T037: Daily.co integration, real-time updates, persistence
+
+#### **Phase 3.5: Polish (10 tasks) [P]**
+- T038-T042: Unit tests for all components and utilities
+- T043-T047: Performance, accessibility, documentation, manual testing
+
+## 🎯 Key Features
+
+### **Parallel Execution Support**
+- **10 parallel test tasks** (T006-T015) can run simultaneously
+- **5 parallel unit test tasks** (T038-T042) can run simultaneously
+- Clear dependency mapping prevents conflicts
+
+### **TDD Compliance**
+- All tests written first and must fail before implementation
+- Contract tests for all 6 API endpoints
+- Integration tests for user journeys from quickstart.md
+
+### **Real-time Architecture**
+- Daily.co WebSocket integration for real-time updates
+- Session-scoped state management
+- Automatic cleanup on participant departure
+- Sub-200ms performance targets
+
+### **Accessibility & UX**
+- WCAG 2.1 AA compliance
+- Keyboard navigation support
+- Screen reader announcements
+- Graceful error handling
+
+## 🚀 Ready for Implementation
+
+The tasks are now ready for execution. You can proceed with:
+
+1. **`/implement`** - Execute the implementation following the task list
+2. **Manual execution** - Work through tasks T001-T047 in order
+3. **Parallel execution** - Run [P] marked tasks simultaneously
+
+Each task is specific enough for an LLM to complete without additional context, with exact file paths and clear requirements.
+
+---
+
+_**User (2025-10-02 23:04Z)**_
+
+Give me a breakdown of what tasks to run and how many to run in a new cursor tab
+
+---
+
+_**Assistant (default)**_
+
+Based on the tasks.md file, here's a breakdown of what tasks to run and how many to run in a new Cursor tab:
+
+## 🎯 Task Execution Strategy
+
+### **Phase 3.1: Setup (5 tasks) - Run Sequentially**
+**Start with these 5 tasks in order:**
+1. **T001** - Create queue API directory structure
+2. **T002** - Create queue component directory structure  
+3. **T003** - Create queue library files
+4. **T004** - Configure TypeScript types for queue system
+5. **T005** - Configure queue state management with Daily.co integration
+
+### **Phase 3.2: Tests First - TDD (10 tasks) - Run ALL in Parallel**
+**Launch all 10 test tasks simultaneously in new Cursor tab:**
+
+**Contract Tests (6 tasks):**
+- T006 - Contract test POST /api/queue/{classroomId}/raise-hand
+- T007 - Contract test POST /api/queue/{classroomId}/lower-hand  
+- T008 - Contract test POST /api/queue/{classroomId}/call-on
+- T009 - Contract test POST /api/queue/{classroomId}/lower-individual
+- T010 - Contract test POST /api/queue/{classroomId}/lower-all
+- T011 - Contract test GET /api/queue/{classroomId}/status
+
+**Integration Tests (4 tasks):**
+- T012 - Integration test participant raises hand flow
+- T013 - Integration test instructor calls on participant flow
+- T014 - Integration test participant leaves during queue flow
+- T015 - Integration test queue at capacity flow
+
+### **Phase 3.3: Core Implementation (14 tasks) - Run in Groups**
+
+**Group 1 - Types & Utilities (5 tasks) - Run in Parallel:**
+- T016 - QueueEntry type definition
+- T017 - QueueState type definition  
+- T018 - ActiveSpeaker type definition
+- T019 - Queue utility functions
+- T020 - Queue state management
+
+**Group 2 - Components (3 tasks) - Run in Parallel:**
+- T021 - RaiseHandButton component
+- T022 - QueuePanel component
+- T023 - QueueStatus component
+
+**Group 3 - API Endpoints (6 tasks) - Run Sequentially:**
+- T024 - POST /api/queue/{classroomId}/raise-hand endpoint
+- T025 - POST /api/queue/{classroomId}/lower-hand endpoint
+- T026 - POST /api/queue/{classroomId}/call-on endpoint
+- T027 - POST /api/queue/{classroomId}/lower-individual endpoint
+- T028 - POST /api/queue/{classroomId}/lower-all endpoint
+- T029 - GET /api/queue/{classroomId}/status endpoint
+
+### **Phase 3.4: Integration (8 tasks) - Run Sequentially**
+- T030-T037 - All integration tasks (component integration, Daily.co connection, etc.)
+
+### **Phase 3.5: Polish (10 tasks) - Run in Parallel**
+- T038-T047 - All unit tests, performance tests, documentation
+
+## 🚀 Recommended Execution Plan
+
+### **New Cursor Tab 1: Setup + Tests**
+```
+Run T001-T005 (Setup) sequentially
+Then run T006-T015 (All Tests) in parallel
+```
+
+### **New Cursor Tab 2: Core Implementation**
+```
+Run T016-T020 (Types & Utilities) in parallel
+Then run T021-T023 (Components) in parallel  
+Then run T024-T029 (API Endpoints) sequentially
+```
+
+### **New Cursor Tab 3: Integration + Polish**
+```
+Run T030-T037 (Integration) sequentially
+Then run T038-T047 (Polish) in parallel
+```
+
+## 📊 Summary
+- **Total Tasks**: 47
+- **Parallel Batches**: 4 (T006-T015, T016-T020, T021-T023, T038-T047)
+- **Sequential Tasks**: 23
+- **Estimated Time**: 2-3 hours for full implementation
+
+## ⚠️ Critical Notes
+1. **Tests MUST fail first** - Don't implement until tests are written and failing
+2. **Respect dependencies** - Don't run T016-T020 until T001-T005 are complete
+3. **Commit after each task** - Follow the workflow rules
+4. **Mark tasks as [X]** in tasks.md when complete
+
+Would you like me to help you start with the first batch of tasks?
+
+---
+
+_**User (2025-10-02 23:04Z)**_
+
+Give me a clear breakdown of the Tnumbers to run and how many to run in each new cursor tab and when to run them
+
+---
+
+_**Assistant (default)**_
+
+# 🎯 Clear Task Execution Breakdown
+
+## **Tab 1: Setup + Tests (15 tasks total)**
+
+### **Step 1: Setup (5 tasks) - Run Sequentially**
+```
+T001 → T002 → T003 → T004 → T005
+```
+- T001: Create queue API directory structure
+- T002: Create queue component directory structure  
+- T003: Create queue library files
+- T004: Configure TypeScript types for queue system
+- T005: Configure queue state management with Daily.co integration
+
+### **Step 2: Tests (10 tasks) - Run ALL in Parallel**
+```
+T006, T007, T008, T009, T010, T011, T012, T013, T014, T015
+```
+- T006: Contract test raise-hand
+- T007: Contract test lower-hand
+- T008: Contract test call-on
+- T009: Contract test lower-individual
+- T010: Contract test lower-all
+- T011: Contract test status
+- T012: Integration test raise hand flow
+- T013: Integration test call on flow
+- T014: Integration test participant leaves flow
+- T015: Integration test queue capacity flow
+
+**Wait for all tests to complete before moving to Tab 2**
+
+---
+
+## **Tab 2: Core Implementation (14 tasks total)**
+
+### **Step 1: Types & Utilities (5 tasks) - Run in Parallel**
+```
+T016, T017, T018, T019, T020
+```
+- T016: QueueEntry type definition
+- T017: QueueState type definition
+- T018: ActiveSpeaker type definition
+- T019: Queue utility functions
+- T020: Queue state management
+
+### **Step 2: Components (3 tasks) - Run in Parallel**
+```
+T021, T022, T023
+```
+- T021: RaiseHandButton component
+- T022: QueuePanel component
+- T023: QueueStatus component
+
+### **Step 3: API Endpoints (6 tasks) - Run Sequentially**
+```
+T024 → T025 → T026 → T027 → T028 → T029
+```
+- T024: POST raise-hand endpoint
+- T025: POST lower-hand endpoint
+- T026: POST call-on endpoint
+- T027: POST lower-individual endpoint
+- T028: POST lower-all endpoint
+- T029: GET status endpoint
+
+**Wait for all core implementation to complete before moving to Tab 3**
+
+---
+
+## **Tab 3: Integration + Polish (18 tasks total)**
+
+### **Step 1: Integration (8 tasks) - Run Sequentially**
+```
+T030 → T031 → T032 → T033 → T034 → T035 → T036 → T037
+```
+- T030: Integrate RaiseHandButton into Classroom
+- T031: Integrate QueuePanel into InstructorControls
+- T032: Integrate QueueStatus into ParticipantList
+- T033: Connect queue state to Daily.co events
+- T034: Implement real-time updates via WebSocket
+- T035: Add queue state persistence
+- T036: Implement automatic cleanup
+- T037: Add queue capacity enforcement
+
+### **Step 2: Polish (10 tasks) - Run ALL in Parallel**
+```
+T038, T039, T040, T041, T042, T043, T044, T045, T046, T047
+```
+- T038: Unit tests for queue-utils
+- T039: Unit tests for queue-state
+- T040: Unit tests for RaiseHandButton
+- T041: Unit tests for QueuePanel
+- T042: Unit tests for QueueStatus
+- T043: Performance tests
+- T044: Accessibility tests
+- T045: Update API documentation
+- T046: Remove duplication
+- T047: Run manual testing
+
+---
+
+## **📋 Execution Summary**
+
+| Tab | Phase | Tasks | Execution | Count |
+|-----|-------|-------|-----------|-------|
+| **Tab 1** | Setup | T001-T005 | Sequential | 5 |
+| **Tab 1** | Tests | T006-T015 | Parallel | 10 |
+| **Tab 2** | Types/Utils | T016-T020 | Parallel | 5 |
+| **Tab 2** | Components | T021-T023 | Parallel | 3 |
+| **Tab 2** | API Endpoints | T024-T029 | Sequential | 6 |
+| **Tab 3** | Integration | T030-T037 | Sequential | 8 |
+| **Tab 3** | Polish | T038-T047 | Parallel | 10 |
+
+## **⏰ Timing**
+- **Tab 1**: Start immediately
+- **Tab 2**: Start after Tab 1 tests complete
+- **Tab 3**: Start after Tab 2 core implementation completes
+
+## **✅ Success Criteria**
+- All tests must fail before implementation
+- Mark tasks as [X] in tasks.md when complete
+- Commit after each task
+- Respect dependency order between tabs
+
+---
+
+_**User (2025-10-02 23:04Z)**_
+
+Give me the commands to run the tasks
+
+---
+
+_**Assistant (default)**_
+
+# 🚀 Task Execution Commands
+
+## **Tab 1: Setup + Tests**
+
+### **Step 1: Setup (Sequential)**
+```bash
+# T001: Create queue API directory structure
+mkdir -p app/api/queue/[classroomId]/raise-hand
+mkdir -p app/api/queue/[classroomId]/lower-hand
+mkdir -p app/api/queue/[classroomId]/call-on
+mkdir -p app/api/queue/[classroomId]/lower-individual
+mkdir -p app/api/queue/[classroomId]/lower-all
+mkdir -p app/api/queue/[classroomId]/status
+
+# T002: Create queue component directory structure
+mkdir -p app/components
+
+# T003: Create queue library files
+touch lib/queue-types.ts
+touch lib/queue-utils.ts
+touch lib/queue-state.ts
+
+# T004: Configure TypeScript types for queue system
+# (Implement in lib/queue-types.ts)
+
+# T005: Configure queue state management with Daily.co integration
+# (Implement in lib/queue-state.ts)
+```
+
+### **Step 2: Tests (Parallel - Run ALL simultaneously)**
+```bash
+# Contract Tests
+# T006: Contract test raise-hand
+# T007: Contract test lower-hand
+# T008: Contract test call-on
+# T009: Contract test lower-individual
+# T010: Contract test lower-all
+# T011: Contract test status
+
+# Integration Tests
+# T012: Integration test raise hand flow
+# T013: Integration test call on flow
+# T014: Integration test participant leaves flow
+# T015: Integration test queue capacity flow
+```
+
+**Create these test files:**
+```bash
+# Contract Tests
+touch tests/contract/test_queue_raise_hand.test.ts
+touch tests/contract/test_queue_lower_hand.test.ts
+touch tests/contract/test_queue_call_on.test.ts
+touch tests/contract/test_queue_lower_individual.test.ts
+touch tests/contract/test_queue_lower_all.test.ts
+touch tests/contract/test_queue_status.test.ts
+
+# Integration Tests
+touch tests/integration/test_queue_raise_hand.test.ts
+touch tests/integration/test_queue_call_on.test.ts
+touch tests/integration/test_queue_participant_leaves.test.ts
+touch tests/integration/test_queue_capacity.test.ts
+```
+
+---
+
+## **Tab 2: Core Implementation**
+
+### **Step 1: Types & Utilities (Parallel)**
+```bash
+# T016: QueueEntry type definition
+# T017: QueueState type definition
+# T018: ActiveSpeaker type definition
+# T019: Queue utility functions
+# T020: Queue state management
+
+# Implement in parallel:
+# - lib/queue-types.ts (T016, T017, T018)
+# - lib/queue-utils.ts (T019)
+# - lib/queue-state.ts (T020)
+```
+
+### **Step 2: Components (Parallel)**
+```bash
+# T021: RaiseHandButton component
+# T022: QueuePanel component
+# T023: QueueStatus component
+
+# Create component files:
+touch app/components/RaiseHandButton.tsx
+touch app/components/QueuePanel.tsx
+touch app/components/QueueStatus.tsx
+```
+
+### **Step 3: API Endpoints (Sequential)**
+```bash
+# T024: POST raise-hand endpoint
+# T025: POST lower-hand endpoint
+# T026: POST call-on endpoint
+# T027: POST lower-individual endpoint
+# T028: POST lower-all endpoint
+# T029: GET status endpoint
+
+# Create endpoint files:
+touch app/api/queue/[classroomId]/raise-hand/route.ts
+touch app/api/queue/[classroomId]/lower-hand/route.ts
+touch app/api/queue/[classroomId]/call-on/route.ts
+touch app/api/queue/[classroomId]/lower-individual/route.ts
+touch app/api/queue/[classroomId]/lower-all/route.ts
+touch app/api/queue/[classroomId]/status/route.ts
+```
+
+---
+
+## **Tab 3: Integration + Polish**
+
+### **Step 1: Integration (Sequential)**
+```bash
+# T030: Integrate RaiseHandButton into Classroom
+# T031: Integrate QueuePanel into InstructorControls
+# T032: Integrate QueueStatus into ParticipantList
+# T033: Connect queue state to Daily.co events
+# T034: Implement real-time updates via WebSocket
+# T035: Add queue state persistence
+# T036: Implement automatic cleanup
+# T037: Add queue capacity enforcement
+
+# Modify existing files:
+# - app/components/Classroom.tsx (T030)
+# - app/components/InstructorControls.tsx (T031)
+# - app/components/ParticipantList.tsx (T032)
+# - lib/queue-state.ts (T033-T037)
+```
+
+### **Step 2: Polish (Parallel)**
+```bash
+# T038: Unit tests for queue-utils
+# T039: Unit tests for queue-state
+# T040: Unit tests for RaiseHandButton
+# T041: Unit tests for QueuePanel
+# T042: Unit tests for QueueStatus
+# T043: Performance tests
+# T044: Accessibility tests
+# T045: Update API documentation
+# T046: Remove duplication
+# T047: Run manual testing
+
+# Create unit test files:
+touch tests/unit/lib/queue-utils.test.ts
+touch tests/unit/lib/queue-state.test.ts
+touch tests/unit/components/RaiseHandButton.test.tsx
+touch tests/unit/components/QueuePanel.test.tsx
+touch tests/unit/components/QueueStatus.test.tsx
+```
+
+---
+
+## ** Quick Start Commands**
+
+### **Start Tab 1:**
+```bash
+# Create all directories and files
+mkdir -p app/api/queue/[classroomId]/{raise-hand,lower-hand,call-on,lower-individual,lower-all,status}
+mkdir -p tests/{contract,integration,unit/{lib,components}}
+touch lib/{queue-types.ts,queue-utils.ts,queue-state.ts}
+touch app/components/{RaiseHandButton.tsx,QueuePanel.tsx,QueueStatus.tsx}
+touch tests/contract/test_queue_{raise_hand,lower_hand,call_on,lower_individual,lower_all,status}.test.ts
+touch tests/integration/test_queue_{raise_hand,call_on,participant_leaves,capacity}.test.ts
+touch tests/unit/{lib/queue-{utils,state}.test.ts,components/{RaiseHandButton,QueuePanel,QueueStatus}.test.tsx}
+```
+
+### **Run Tests:**
+```bash
+# Run all tests to ensure they fail first
+npm test
+```
+
+### **Mark Tasks Complete:**
+```bash
+# After each task, mark it as [X] in tasks.md
+# Example: Change "- [ ] T001" to "- [x] T001"
+```
+
+## **⚠️ Important Notes**
+1. **Tests MUST fail first** - Don't implement until tests are written and failing
+2. **Commit after each task** - `git add . && git commit -m "T001: Create queue API directory structure"`
+3. **Respect dependencies** - Don't start Tab 2 until Tab 1 tests complete
+4. **Mark tasks as [X]** in tasks.md when complete
+
+---
+

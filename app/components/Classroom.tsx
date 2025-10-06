@@ -11,8 +11,21 @@ import {
   hasInstructorPermissions,
   safelyLeaveCall 
 } from '@/lib/daily-utils';
+import { QueueState, ActiveSpeaker, QueueEvent } from '@/lib/queue-types';
+import { 
+  getQueueState, 
+  addToQueue, 
+  removeFromQueue,
+  callOnNextParticipant,
+  lowerAllHands,
+  initializeDailyQueueIntegration,
+  cleanupDailyQueueIntegration,
+  addQueueEventListener,
+  removeQueueEventListener
+} from '@/lib/queue-state';
 import InstructorControls from './InstructorControls';
 import VideoFeed from './VideoFeed';
+import RaiseHandButton from './RaiseHandButton';
 
 // Module-level singleton to prevent duplicate Daily instances
 // WHY: React strict mode causes effects to run twice, which creates duplicate Daily iframes
@@ -148,6 +161,8 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(true);
+  const [queueState, setQueueState] = useState<QueueState | null>(null);
+  const [activeSpeaker, setActiveSpeaker] = useState<ActiveSpeaker | null>(null);
 
   // Get classroom configuration
   const classroom = getDailyRoomById(classroomId);
@@ -228,6 +243,14 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
       setConnectionState('connected');
       setError(null);
       setIsJoining(false);
+      
+      // Initialize queue integration
+      if (daily) {
+        initializeDailyQueueIntegration(daily);
+        // Load current queue state
+        const currentQueueState = getQueueState(classroomId);
+        setQueueState(currentQueueState);
+      }
     };
 
     const handleLeftMeeting = () => {
@@ -255,6 +278,18 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
       console.log('[Daily Event] Participant left:', evt.participant);
     };
 
+    // Queue event handlers
+    const handleQueueEvent = (event: QueueEvent) => {
+      if (event.classroomId === classroomId) {
+        if (event.type === 'queue-updated' && event.data && 'entries' in event.data) {
+          setQueueState(event.data as QueueState);
+        }
+      }
+    };
+
+    // Add queue event listener
+    addQueueEventListener(handleQueueEvent);
+
     // Subscribe to Daily events
     daily.on('joined-meeting', handleJoinedMeeting);
     daily.on('left-meeting', handleLeftMeeting);
@@ -272,8 +307,58 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
       daily.off('error', handleError);
       daily.off('participant-joined', handleParticipantJoined);
       daily.off('participant-left', handleParticipantLeft);
+      removeQueueEventListener(handleQueueEvent);
+      cleanupDailyQueueIntegration();
     };
-  }, [daily, joinRoom]);
+  }, [daily, joinRoom, classroomId]);
+
+  // Queue operation handlers
+  const handleRaiseHand = useCallback(async (
+    classroomId: string, 
+    participantId: string, 
+    participantName: string, 
+    role: 'student' | 'instructor'
+  ) => {
+    try {
+      const updatedState = addToQueue(classroomId, participantId, participantName, role);
+      setQueueState(updatedState);
+    } catch (error) {
+      console.error('Error raising hand:', error);
+      throw error;
+    }
+  }, []);
+
+  const handleLowerHand = useCallback(async (classroomId: string, participantId: string) => {
+    try {
+      const updatedState = removeFromQueue(classroomId, participantId);
+      setQueueState(updatedState);
+    } catch (error) {
+      console.error('Error lowering hand:', error);
+      throw error;
+    }
+  }, []);
+
+  const handleCallOnNext = useCallback(async (classroomId: string, instructorId: string) => {
+    try {
+      const { queueState: updatedState, activeSpeaker: newActiveSpeaker } = callOnNextParticipant(classroomId, instructorId);
+      setQueueState(updatedState);
+      setActiveSpeaker(newActiveSpeaker);
+    } catch (error) {
+      console.error('Error calling on next participant:', error);
+      throw error;
+    }
+  }, []);
+
+  const handleLowerAll = useCallback(async (classroomId: string, _instructorId: string) => {
+    try {
+      const updatedState = lowerAllHands(classroomId);
+      setQueueState(updatedState);
+      setActiveSpeaker(null);
+    } catch (error) {
+      console.error('Error lowering all hands:', error);
+      throw error;
+    }
+  }, []);
 
   // Handle leaving the classroom
   const handleLeave = useCallback(async () => {
@@ -360,6 +445,24 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
               />
             </div>
 
+            {/* Raise Hand Button - Only visible for students */}
+            {user.role === 'student' && localParticipant && (
+              <div className="border-t border-gray-700 p-4 bg-gray-900">
+                <div className="flex justify-center">
+                  <RaiseHandButton
+                    classroomId={classroomId}
+                    participantId={localParticipant.session_id}
+                    participantName={user.name}
+                    role={user.role}
+                    queueState={queueState}
+                    onRaiseHand={handleRaiseHand}
+                    onLowerHand={handleLowerHand}
+                    disabled={false}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Instructor Controls - Only visible for instructors (T040: Role-based UI) */}
             {user.role === 'instructor' && localParticipant && hasInstructorPermissions(localParticipant) && (
               <div className="border-t border-gray-700 p-4 bg-gray-900">
@@ -367,6 +470,11 @@ function ClassroomContent({ classroomId, user, onLeave }: ClassroomContentProps)
                   instructor={user}
                   classroomId={classroomId}
                   enabled={true}
+                  queueState={queueState}
+                  activeSpeaker={activeSpeaker}
+                  onCallOnNext={handleCallOnNext}
+                  onLowerIndividual={handleLowerHand}
+                  onLowerAll={handleLowerAll}
                 />
               </div>
             )}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { DAILY_ROOMS } from '@/lib/daily-config';
 import { UI_CONSTANTS } from '@/lib/constants';
 import { Classroom, AppUser } from '@/lib/types';
-import { isClassroomFull, validateUserName } from '@/lib/daily-utils';
+import { isClassroomFull, validateDailyUserName } from '@/lib/daily-utils';
 
 interface LobbyProps {
   onJoinClassroom: (classroomId: string, user: AppUser) => void;
@@ -83,7 +83,7 @@ function UserForm({ onSubmit, disabled }: UserFormProps) {
     const newErrors: Record<string, string> = {};
     
     // Use centralized name validation from daily-utils
-    const nameValidation = validateUserName(name);
+    const nameValidation = validateDailyUserName(name);
     if (!nameValidation.valid) {
       newErrors.name = nameValidation.error || 'Invalid name';
     }

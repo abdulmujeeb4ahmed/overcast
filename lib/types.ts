@@ -188,6 +188,19 @@ export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'err
 export type MeetingState = 'new' | 'joining' | 'joined' | 'left' | 'error';
 
 /**
+ * Queue system types (from queue-types.ts)
+ * Re-export queue types for application-wide use
+ */
+export type {
+  QueueEntry,
+  QueueState,
+  ActiveSpeaker,
+  QueueOperation,
+  QueueEvent,
+  QueueError
+} from './queue-types';
+
+/**
  * Utility types for form validation and UI state
  */
 export interface FormValidation {

@@ -422,6 +422,267 @@ test.describe('Performance Testing: Capacity and Scale', () => {
 });
 
 // Performance summary test
+test.describe('Performance Testing: Queue Real-time Updates', () => {
+  test('Queue raise hand updates propagate in <200ms', async ({ page }) => {
+    await page.goto('/');
+    
+    // Join classroom as instructor
+    await page.click('text=Cohort 1');
+    await page.fill('[data-testid="name-input"]', 'Instructor');
+    await page.click('[data-testid="join-instructor-button"]');
+    await page.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Open second browser context to simulate student
+    const studentContext = await page.context().newPage();
+    await studentContext.goto('/');
+    await studentContext.click('text=Cohort 1');
+    await studentContext.fill('[data-testid="name-input"]', 'Student');
+    await studentContext.click('[data-testid="join-student-button"]');
+    await studentContext.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Wait for raise hand button to be visible
+    await studentContext.waitForSelector('[data-testid="raise-hand-button"]');
+    
+    // Measure time from raise hand click to instructor seeing the update
+    const startTime = Date.now();
+    
+    // Student raises hand
+    await studentContext.click('[data-testid="raise-hand-button"]');
+    
+    // Wait for instructor to see the queue update
+    await page.waitForSelector('[data-testid="queue-panel"]');
+    await page.waitForSelector('[data-testid="queue-entry"]', { timeout: 5000 });
+    
+    const updateTime = Date.now() - startTime;
+    
+    console.log(`Queue raise hand update time: ${updateTime}ms`);
+    
+    // Real-time updates should be under 200ms
+    expect(updateTime).toBeLessThan(200);
+    
+    await studentContext.close();
+    
+    // SUCCESS: Real-time queue updates meet performance requirement
+  });
+  
+  test('Queue call-on updates propagate in <200ms', async ({ page }) => {
+    await page.goto('/');
+    
+    // Join classroom as instructor
+    await page.click('text=Cohort 1');
+    await page.fill('[data-testid="name-input"]', 'Instructor');
+    await page.click('[data-testid="join-instructor-button"]');
+    await page.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Open second browser context to simulate student
+    const studentContext = await page.context().newPage();
+    await studentContext.goto('/');
+    await studentContext.click('text=Cohort 1');
+    await studentContext.fill('[data-testid="name-input"]', 'Student');
+    await studentContext.click('[data-testid="join-student-button"]');
+    await studentContext.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Student raises hand first
+    await studentContext.waitForSelector('[data-testid="raise-hand-button"]');
+    await studentContext.click('[data-testid="raise-hand-button"]');
+    
+    // Wait for instructor to see the queue
+    await page.waitForSelector('[data-testid="queue-panel"]');
+    await page.waitForSelector('[data-testid="queue-entry"]');
+    
+    // Measure time from call-on click to student seeing the update
+    const startTime = Date.now();
+    
+    // Instructor calls on student
+    await page.click('[data-testid="call-on-button"]');
+    
+    // Wait for student to see active speaker status
+    await studentContext.waitForSelector('[data-testid="active-speaker-status"]', { timeout: 5000 });
+    
+    const updateTime = Date.now() - startTime;
+    
+    console.log(`Queue call-on update time: ${updateTime}ms`);
+    
+    // Real-time updates should be under 200ms
+    expect(updateTime).toBeLessThan(200);
+    
+    await studentContext.close();
+    
+    // SUCCESS: Real-time call-on updates meet performance requirement
+  });
+  
+  test('Multiple simultaneous queue updates handle efficiently', async ({ page }) => {
+    await page.goto('/');
+    
+    // Join classroom as instructor
+    await page.click('text=Cohort 1');
+    await page.fill('[data-testid="name-input"]', 'Instructor');
+    await page.click('[data-testid="join-instructor-button"]');
+    await page.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Create multiple student contexts
+    const studentContexts = [];
+    for (let i = 0; i < 5; i++) {
+      const studentContext = await page.context().newPage();
+      await studentContext.goto('/');
+      await studentContext.click('text=Cohort 1');
+      await studentContext.fill('[data-testid="name-input"]', `Student ${i + 1}`);
+      await studentContext.click('[data-testid="join-student-button"]');
+      await studentContext.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+      studentContexts.push(studentContext);
+    }
+    
+    // Wait for all students to be ready
+    await Promise.all(studentContexts.map(ctx => 
+      ctx.waitForSelector('[data-testid="raise-hand-button"]')
+    ));
+    
+    // Measure time for multiple simultaneous raise hands
+    const startTime = Date.now();
+    
+    // All students raise hands simultaneously
+    await Promise.all(studentContexts.map(ctx => 
+      ctx.click('[data-testid="raise-hand-button"]')
+    ));
+    
+    // Wait for instructor to see all queue entries
+    await page.waitForSelector('[data-testid="queue-panel"]');
+    await page.waitForSelector('[data-testid="queue-entry"]');
+    
+    // Wait for all queue entries to appear (should be 5)
+    await page.waitForFunction(() => {
+      const entries = document.querySelectorAll('[data-testid="queue-entry"]');
+      return entries.length >= 5;
+    }, { timeout: 5000 });
+    
+    const updateTime = Date.now() - startTime;
+    
+    console.log(`Multiple simultaneous queue updates time: ${updateTime}ms`);
+    
+    // Multiple updates should still be under 200ms
+    expect(updateTime).toBeLessThan(200);
+    
+    // Clean up student contexts
+    await Promise.all(studentContexts.map(ctx => ctx.close()));
+    
+    // SUCCESS: Multiple simultaneous updates handled efficiently
+  });
+  
+  test('Queue state persistence across page refreshes is fast', async ({ page }) => {
+    await page.goto('/');
+    
+    // Join classroom as instructor
+    await page.click('text=Cohort 1');
+    await page.fill('[data-testid="name-input"]', 'Instructor');
+    await page.click('[data-testid="join-instructor-button"]');
+    await page.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Open student context
+    const studentContext = await page.context().newPage();
+    await studentContext.goto('/');
+    await studentContext.click('text=Cohort 1');
+    await studentContext.fill('[data-testid="name-input"]', 'Student');
+    await studentContext.click('[data-testid="join-student-button"]');
+    await studentContext.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Student raises hand
+    await studentContext.waitForSelector('[data-testid="raise-hand-button"]');
+    await studentContext.click('[data-testid="raise-hand-button"]');
+    
+    // Wait for queue to be established
+    await page.waitForSelector('[data-testid="queue-panel"]');
+    await page.waitForSelector('[data-testid="queue-entry"]');
+    
+    // Measure time for page refresh and state restoration
+    const startTime = Date.now();
+    
+    // Refresh instructor page
+    await page.reload();
+    
+    // Wait for page to load and queue state to be restored
+    await page.waitForSelector('[data-testid="queue-panel"]');
+    await page.waitForSelector('[data-testid="queue-entry"]');
+    
+    const restoreTime = Date.now() - startTime;
+    
+    console.log(`Queue state restore time: ${restoreTime}ms`);
+    
+    // State restoration should be fast (<500ms)
+    expect(restoreTime).toBeLessThan(500);
+    
+    await studentContext.close();
+    
+    // SUCCESS: Queue state persistence is fast
+  });
+  
+  test('Queue operations maintain performance under load', async ({ page }) => {
+    await page.goto('/');
+    
+    // Join classroom as instructor
+    await page.click('text=Cohort 1');
+    await page.fill('[data-testid="name-input"]', 'Instructor');
+    await page.click('[data-testid="join-instructor-button"]');
+    await page.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+    
+    // Create multiple students
+    const studentContexts = [];
+    for (let i = 0; i < 10; i++) {
+      const studentContext = await page.context().newPage();
+      await studentContext.goto('/');
+      await studentContext.click('text=Cohort 1');
+      await studentContext.fill('[data-testid="name-input"]', `Student ${i + 1}`);
+      await studentContext.click('[data-testid="join-student-button"]');
+      await studentContext.waitForSelector('[data-testid="video-feed"]', { timeout: 15000 });
+      studentContexts.push(studentContext);
+    }
+    
+    // Wait for all students to be ready
+    await Promise.all(studentContexts.map(ctx => 
+      ctx.waitForSelector('[data-testid="raise-hand-button"]')
+    ));
+    
+    const operationTimes: number[] = [];
+    
+    // Perform multiple queue operations and measure each
+    for (let i = 0; i < 5; i++) {
+      // Students raise hands
+      const startTime = Date.now();
+      
+      await Promise.all(studentContexts.slice(i * 2, (i + 1) * 2).map(ctx => 
+        ctx.click('[data-testid="raise-hand-button"]')
+      ));
+      
+      // Wait for updates to propagate
+      await page.waitForSelector('[data-testid="queue-panel"]');
+      
+      const operationTime = Date.now() - startTime;
+      operationTimes.push(operationTime);
+      
+      console.log(`Queue operation ${i + 1} time: ${operationTime}ms`);
+      
+      // Brief pause between operations
+      await page.waitForTimeout(100);
+    }
+    
+    const averageOperationTime = operationTimes.reduce((a, b) => a + b, 0) / operationTimes.length;
+    const maxOperationTime = Math.max(...operationTimes);
+    
+    console.log(`Average operation time: ${averageOperationTime.toFixed(2)}ms`);
+    console.log(`Max operation time: ${maxOperationTime}ms`);
+    
+    // All operations should be under 200ms
+    expect(maxOperationTime).toBeLessThan(200);
+    
+    // Average should be well under 200ms
+    expect(averageOperationTime).toBeLessThan(150);
+    
+    // Clean up
+    await Promise.all(studentContexts.map(ctx => ctx.close()));
+    
+    // SUCCESS: Queue operations maintain performance under load
+  });
+});
+
 test.describe('Performance Testing: Summary Report', () => {
   test('Generate performance summary', async ({ page }) => {
     const metrics: Record<string, number> = {};

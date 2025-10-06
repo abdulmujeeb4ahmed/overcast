@@ -1,7 +1,14 @@
 openapi: 3.0.3
 info:
   title: Queue Management API
-  description: API for managing raise hand queue in live classrooms
+  description: |
+    API for managing raise hand queue in live classrooms. This API provides endpoints for:
+    - Participants to raise and lower their hands
+    - Instructors to manage the speaking queue
+    - Real-time queue status monitoring
+    - Session-scoped queue state management
+    
+    All queue operations are real-time and synchronized across all participants via Daily.co WebSocket events.
   version: 1.0.0
   contact:
     name: Overcast Development Team
@@ -40,11 +47,13 @@ paths:
                   type: string
                   format: uuid
                   description: Daily.co participant session ID
+                  example: "550e8400-e29b-41d4-a716-446655440000"
                 participantName:
                   type: string
                   minLength: 1
                   maxLength: 50
                   description: Display name of participant
+                  example: "John Doe"
       responses:
         '200':
           description: Hand raised successfully
@@ -63,11 +72,42 @@ paths:
                     description: Position in queue (1-based)
                     example: 2
         '400':
-          description: Bad request - invalid input or already in queue
+          description: Bad request - invalid input, already in queue, or queue not active
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid JSON in request body"
+                    code: "INVALID_JSON"
+                invalid_request:
+                  summary: Invalid request body
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid request body. Required fields: participantId (string), participantName (string, 1-50 chars)"
+                    code: "INVALID_REQUEST_BODY"
+                already_in_queue:
+                  summary: Already in queue
+                  value:
+                    error: "Bad Request"
+                    message: "Participant already in queue"
+                    code: "ALREADY_IN_QUEUE"
+                queue_not_active:
+                  summary: Queue not active
+                  value:
+                    error: "Bad Request"
+                    message: "Queue is not currently accepting new entries"
+                    code: "QUEUE_NOT_ACTIVE"
         '403':
           description: Forbidden - participant not in classroom
           content:
@@ -80,6 +120,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                queue_at_capacity:
+                  summary: Queue at capacity
+                  value:
+                    error: "Conflict"
+                    message: "Queue is at maximum capacity"
+                    code: "QUEUE_AT_CAPACITY"
 
   /{classroomId}/lower-hand:
     post:
@@ -128,12 +175,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid JSON in request body"
+                    code: "INVALID_JSON"
+                invalid_request:
+                  summary: Invalid request body
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid request body. Required field: participantId (string)"
+                    code: "INVALID_REQUEST_BODY"
         '404':
           description: Not found - participant not in queue
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                participant_not_in_queue:
+                  summary: Participant not in queue
+                  value:
+                    error: "Not Found"
+                    message: "Participant not found in queue"
+                    code: "PARTICIPANT_NOT_IN_QUEUE"
 
   /{classroomId}/call-on:
     post:
@@ -162,6 +235,7 @@ paths:
                   type: string
                   format: uuid
                   description: Instructor session ID
+                  example: "550e8400-e29b-41d4-a716-446655440001"
       responses:
         '200':
           description: Participant called on successfully
@@ -178,23 +252,62 @@ paths:
                   queueEntry:
                     $ref: '#/components/schemas/QueueEntry'
         '400':
-          description: Bad request - invalid input
+          description: Bad request - invalid input or already an active speaker
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid JSON in request body"
+                    code: "INVALID_JSON"
+                invalid_request:
+                  summary: Invalid request body
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid request body. Required field: instructorId (string)"
+                    code: "INVALID_REQUEST_BODY"
+                already_active_speaker:
+                  summary: Already an active speaker
+                  value:
+                    error: "Bad Request"
+                    message: "There is already an active speaker"
+                    code: "ALREADY_ACTIVE_SPEAKER"
         '403':
           description: Forbidden - not an instructor
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_permissions:
+                  summary: Insufficient permissions
+                  value:
+                    error: "Forbidden"
+                    message: "Only instructors can call on participants"
+                    code: "INSUFFICIENT_PERMISSIONS"
         '404':
           description: Not found - no participants in queue
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                no_participants:
+                  summary: No participants in queue
+                  value:
+                    error: "Not Found"
+                    message: "No participants in queue to call on"
+                    code: "NO_PARTICIPANTS_IN_QUEUE"
 
   /{classroomId}/lower-individual:
     post:
@@ -248,18 +361,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid JSON in request body"
+                    code: "INVALID_JSON"
+                invalid_request:
+                  summary: Invalid request body
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid request body. Required fields: instructorId (string), participantId (string)"
+                    code: "INVALID_REQUEST_BODY"
         '403':
           description: Forbidden - not an instructor
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_permissions:
+                  summary: Insufficient permissions
+                  value:
+                    error: "Forbidden"
+                    message: "Only instructors can lower individual hands"
+                    code: "INSUFFICIENT_PERMISSIONS"
         '404':
           description: Not found - participant not in queue
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                participant_not_in_queue:
+                  summary: Participant not in queue
+                  value:
+                    error: "Not Found"
+                    message: "Participant not found in queue"
+                    code: "PARTICIPANT_NOT_IN_QUEUE"
 
   /{classroomId}/lower-all:
     post:
@@ -312,12 +458,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
+                invalid_json:
+                  summary: Invalid JSON
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid JSON in request body"
+                    code: "INVALID_JSON"
+                invalid_request:
+                  summary: Invalid request body
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid request body. Required field: instructorId (string)"
+                    code: "INVALID_REQUEST_BODY"
         '403':
           description: Forbidden - not an instructor
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_permissions:
+                  summary: Insufficient permissions
+                  value:
+                    error: "Forbidden"
+                    message: "Only instructors can lower all hands"
+                    code: "INSUFFICIENT_PERMISSIONS"
 
   /{classroomId}/status:
     get:
@@ -346,6 +518,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_classroom:
+                  summary: Invalid classroom ID
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid classroom ID. Must be between 1 and 6."
+                    code: "INVALID_CLASSROOM_ID"
         '404':
           description: Not found - classroom not found
           content:
@@ -448,9 +627,11 @@ components:
           description: Ordered list of queue entries
         activeSpeaker:
           oneOf:
-            - $ref: '#/components/schemas/ActiveSpeaker'
+            - type: string
+              format: uuid
+              description: Participant ID of active speaker
             - type: "null"
-          description: Currently active speaker (null if none)
+          description: Currently active speaker participant ID (null if none)
         maxCapacity:
           type: integer
           minimum: 1

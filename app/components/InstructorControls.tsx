@@ -4,6 +4,8 @@ import React, { useState, useCallback } from 'react';
 import { useDaily } from '@daily-co/daily-react';
 import { DailyParticipant } from '@daily-co/daily-js';
 import { AppUser, MuteParticipantRequest, MuteAllParticipantsRequest, CreateBreakoutRoomRequest } from '@/lib/types';
+import { QueueState, ActiveSpeaker } from '@/lib/queue-types';
+import QueuePanel from './QueuePanel';
 
 interface InstructorControlsProps {
   /** Current instructor user information */
@@ -12,6 +14,16 @@ interface InstructorControlsProps {
   classroomId: string;
   /** Whether the instructor controls are enabled */
   enabled?: boolean;
+  /** Current queue state */
+  queueState?: QueueState | null;
+  /** Current active speaker */
+  activeSpeaker?: ActiveSpeaker | null;
+  /** Callback to call on next participant */
+  onCallOnNext?: (classroomId: string, instructorId: string) => Promise<void>;
+  /** Callback to lower individual participant's hand */
+  onLowerIndividual?: (classroomId: string, instructorId: string, participantId: string) => Promise<void>;
+  /** Callback to lower all hands */
+  onLowerAll?: (classroomId: string, instructorId: string) => Promise<void>;
 }
 
 /**
@@ -28,7 +40,12 @@ interface InstructorControlsProps {
 export default function InstructorControls({ 
   instructor, 
   classroomId, 
-  enabled = true 
+  enabled = true,
+  queueState = null,
+  activeSpeaker = null,
+  onCallOnNext,
+  onLowerIndividual,
+  onLowerAll
 }: InstructorControlsProps) {
   // Daily React hooks for participant management
   const daily = useDaily();
@@ -315,6 +332,23 @@ export default function InstructorControls({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Queue Management Panel */}
+      {(onCallOnNext || onLowerIndividual || onLowerAll) && (
+        <div className="space-y-2">
+          <QueuePanel
+            classroomId={classroomId}
+            queueState={queueState}
+            activeSpeaker={activeSpeaker}
+            instructorId={instructor.sessionId}
+            onCallOnNext={onCallOnNext || (async () => {})}
+            onLowerIndividual={onLowerIndividual || (async () => {})}
+            onLowerAll={onLowerAll || (async () => {})}
+            disabled={!enabled || isLoading}
+            className="mt-4"
+          />
         </div>
       )}
 

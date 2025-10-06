@@ -7,6 +7,8 @@ import React from 'react';
 import { useParticipantIds, useDaily, useLocalParticipant } from '@daily-co/daily-react';
 import { DailyParticipant } from '@daily-co/daily-js';
 import { AppUser } from '@/lib/types';
+import { QueueState, ActiveSpeaker } from '@/lib/queue-types';
+import QueueStatus from './QueueStatus';
 
 interface ParticipantListProps {
   /** Current user context for permission checks */
@@ -19,6 +21,12 @@ interface ParticipantListProps {
   onMuteAll?: (muted: boolean) => void;
   /** CSS class for styling */
   className?: string;
+  /** Current queue state */
+  queueState?: QueueState | null;
+  /** Current active speaker */
+  activeSpeaker?: ActiveSpeaker | null;
+  /** Whether to show detailed queue information */
+  showQueueDetails?: boolean;
 }
 
 /**
@@ -38,7 +46,10 @@ export default function ParticipantList({
   showControls = false,
   onMuteParticipant,
   onMuteAll,
-  className = ''
+  className = '',
+  queueState = null,
+  activeSpeaker = null,
+  showQueueDetails = false
 }: ParticipantListProps) {
   // Daily React hooks
   const participantIds = useParticipantIds();
@@ -222,6 +233,17 @@ export default function ParticipantList({
           </button>
         )}
       </div>
+
+      {/* Queue Status */}
+      {(queueState || activeSpeaker) && (
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <QueueStatus
+            queueState={queueState}
+            activeSpeaker={activeSpeaker}
+            showDetails={showQueueDetails}
+          />
+        </div>
+      )}
 
       {/* Participants list */}
       {participants.length === 0 ? (

@@ -220,7 +220,7 @@ export function getCapacityStatus(
  * WHY: Daily.co has restrictions on user names. This validates
  * names before attempting to join.
  */
-export function validateUserName(name: string): { valid: boolean; error?: string } {
+export function validateDailyUserName(name: string): { valid: boolean; error?: string } {
   const trimmed = name.trim();
   
   if (trimmed.length === 0) {
